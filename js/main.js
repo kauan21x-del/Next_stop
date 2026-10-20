@@ -1,6 +1,7 @@
 // Ponto de entrada: roteador por hash (#/aprender, #/cursos, ...) e relógio das vidas.
 import { h, mascot } from './ui.js';
 import { getState, subscribe } from './store.js';
+import { authView } from './views/auth.js';
 import { formatCountdown, heartsNow } from './progress.js';
 import { welcomeView } from './views/welcome.js';
 import { learnView } from './views/learn.js';
@@ -11,7 +12,13 @@ import { lessonView } from './views/lesson.js';
 const app = document.getElementById('app');
 let cleanup = null;
 
-const TITLES = { aprender: 'Aprender', cursos: 'Cursos', perfil: 'Perfil', licao: 'Lição' };
+const TITLES = {
+  entrar: 'Entrar',
+  aprender: 'Aprender',
+  cursos: 'Cursos',
+  perfil: 'Perfil',
+  licao: 'Lição',
+};
 
 function notFound() {
   return h(
@@ -28,10 +35,17 @@ function render({ fresh = false } = {}) {
   const [name, a, b] = (location.hash.replace(/^#/, '') || '/').split('/').filter(Boolean);
   const { onboarded } = getState();
 
+  if (name === 'entrar') {
+    cleanup?.();
+    cleanup = null;
+    app.replaceChildren(authView());
+    document.title = 'Entrar · Next Stop';
+    return;
+  }
+
   // Quem ainda não escolheu um curso começa pela tela de boas-vindas.
   if (!onboarded && name !== undefined) return location.replace('#/');
   if (onboarded && name === undefined) return location.replace('#/aprender');
-
   cleanup?.();
   cleanup = null;
 
